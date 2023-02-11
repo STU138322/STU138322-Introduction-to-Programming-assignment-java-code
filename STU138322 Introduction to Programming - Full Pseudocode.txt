@@ -1,0 +1,199 @@
+Class SubjectManagement
+    DECLARE classList AS ARRAYLIST OF STRING
+    DECLARE studentMarks AS ARRAY OF DOUBLE OF LENGTH classList.size()
+    DECLARE subjects AS ARRAY OF STRING WITH VALUES ["English", "Maths", "Science", "Geography", "History", "Physical education", "Digital & Creative", "Social studies"]
+    DECLARE totalMarks AS ARRAY OF DOUBLE WITH VALUES [100, 120, 150, 100, 100, 80, 150, 100]
+    DECLARE tempSubjectIndex AS INTEGER
+    
+    DO
+      DISPLAY "\n1. Create a class list"
+      DISPLAY "\n2. Provide marks for a subject"
+      DISPLAY "\n3. Get grade statistics for a subject"
+      DISPLAY "\n4. Exit"
+      DISPLAY "\nEnter option: "
+      TRY
+        READ option AS INTEGER
+        SWITCH option
+          CASE 1:
+            CALL createClassList()
+            BREAK
+          CASE 2:
+            CALL provideMarks()
+            BREAK
+          CASE 3:
+            CALL getGradeStats()
+            BREAK
+          CASE 4:
+            DISPLAY "Exiting program"
+            BREAK
+          DEFAULT:
+            DISPLAY "Invalid option selected. Try again."
+            BREAK
+        END SWITCH
+      CATCH
+        DISPLAY "Invalid input. Try again."
+        READ sc.nextLine()
+      END TRY
+    UNTIL option = 4
+    
+Function createClassList()
+    input = Scanner object for user input
+    studentId = ""
+    display "\nEnter student IDs for all the students enrolled in the class (Enter 'q' to stop):\n"
+    repeat until studentId = "q"
+        display "Student ID: "
+        studentId = input.nextLine()
+        if studentId ≠ "q"
+            add studentId to classList
+    end repeat
+    display "\nClass list created successfully"
+end function
+
+PROCEDURE provideMarks
+    CREATE Scanner sc
+    CREATE double array tempStudentMarks with size equal to classList size
+    CREATE int subjectIndex and set it to 0
+    CREATE int marks
+    
+    IF classList is empty
+        display "No class list found. Please create a class list first."
+        RETURN
+    END IF
+    
+    display "Enter the subject for which you want to provide marks:"
+    FOR i = 0 to subjects length - 1
+        display (i + 1) + ". " + subjects[i]
+    END FOR
+    
+    TRY
+        display "Enter option: "
+        SET subjectIndex to (sc.nextLine() - 1)
+        SET tempSubjectIndex to subjectIndex
+        IF subjectIndex is less than 0 OR subjectIndex is greater than or equal to subjects length
+            display "Invalid subject selected. Try again."
+            RETURN
+        END IF
+        
+        display "Maximum possible score in " + subjects[subjectIndex] + " is " + Math.round(totalMarks[subjectIndex]) + ". Please enter a value between 0 and " + Math.round(totalMarks[subjectIndex]) + "."
+        
+        CREATE int studentIndex and set it to 0
+        FOR each studentId in classList
+            CREATE boolean inputValid and set it to false
+            WHILE inputValid is false
+                display "Enter marks for " + studentId + " in " + subjects[subjectIndex] + ": "
+                SET marks to sc.nextLine()
+                IF marks is less than 0 OR marks is greater than totalMarks[subjectIndex]
+                    display "Invalid marks. Try again."
+                ELSE
+                    SET tempStudentMarks[studentIndex] to marks
+                    SET studentMarks to tempStudentMarks
+                    SET inputValid to true
+                END IF
+            END WHILE
+            SET studentIndex to studentIndex + 1
+        END FOR
+        
+        display "Marks provided successfully for " + subjects[subjectIndex]
+        display "Do you want to see the marks entered for " + subjects[subjectIndex] + "? (yes/no): "
+        CREATE String option and set it to sc.nextLine()
+        display ""
+        IF option is equal to "yes" ignoring case
+            CREATE int studentNumber and set it to 1
+            FOR i = 0 to classList size - 1
+                display "Marks for student " + studentNumber + " (" + classList[i] + ") in " + subjects[subjectIndex] + ": " + studentMarks[i]
+                SET studentNumber to studentNumber + 1
+            END FOR
+        END IF
+    CATCH Exception e
+        display "Invalid input. Try again."
+    END TRY
+END PROCEDURE
+
+PROCEDURE getGradeStats()
+    DECLARE percentMarks[] as INTEGER
+    DECLARE grades[] as STRING
+    DECLARE gradeCountAstar as INTEGER
+    DECLARE gradeCountA as INTEGER
+    DECLARE gradeCountB as INTEGER
+    DECLARE gradeCountC as INTEGER
+    DECLARE gradeCountD as INTEGER
+    DECLARE gradeCountE as INTEGER
+    DECLARE gradeCountU as INTEGER
+
+    SET percentMarks[] = studentMarks[] / totalMarks[tempSubjectIndex] * 100
+
+    FOR i = 0 to length of studentMarks[]
+        IF percentMarks[i] <= 100 AND percentMarks[i] >= 90
+            SET grades[i] = "A*"
+            ADD 1 to gradeCountAstar
+        END IF
+        IF percentMarks[i] < 90 AND percentMarks[i] >= 80
+            SET grades[i] = "A"
+            ADD 1 to gradeCountA
+        END IF
+        IF percentMarks[i] < 80 AND percentMarks[i] >= 70
+            SET grades[i] = "B"
+            ADD 1 to gradeCountB
+        END IF
+        IF percentMarks[i] < 70 AND percentMarks[i] >= 60
+            SET grades[i] = "C"
+            ADD 1 to gradeCountC
+        END IF
+        IF percentMarks[i] < 60 AND percentMarks[i] >= 50
+            SET grades[i] = "D"
+            ADD 1 to gradeCountD
+        END IF
+        IF percentMarks[i] < 50 AND percentMarks[i] >= 40
+            SET grades[i] = "E"
+            ADD 1 to gradeCountE
+        END IF
+        IF percentMarks[i] < 40 AND percentMarks[i] >= 0
+            SET grades[i] = "U"
+            ADD 1 to gradeCountU
+        END IF
+    END FOR
+
+    DECLARE sum as INTEGER
+    DECLARE minimum as INTEGER
+    DECLARE maximum as INTEGER
+    SET sum = 0
+    SET minimum = percentMarks[0]
+    SET maximum = percentMarks[0]
+    FOR i = 0 to length of percentMarks[]
+        ADD percentMarks[i] to sum
+        IF percentMarks[i] < minimum
+            SET minimum = percentMarks[i]
+        END IF
+        IF percentMarks[i] > maximum
+            SET maximum = percentMarks[i]
+        END IF
+    END FOR
+    DECLARE classAverage as DOUBLE
+    SET classAverage = sum / length of percentMarks[]
+    DECLARE range as INTEGER
+    SET range = maximum - minimum
+
+    DECLARE sumOfSquares as DOUBLE
+    SET sumOfSquares = 0
+    FOR i = 0 to length of percentMarks[]
+        ADD pow(percentMarks[i] - classAverage, 2) to sumOfSquares
+    END FOR
+    DECLARE variance as DOUBLE
+    SET variance = sumOfSquares / length of percentMarks[]
+    DECLARE standardDeviation as DOUBLE
+    SET standardDeviation = square root of variance
+
+    display "Subject: " + subjects[tempSubjectIndex] + "\tMax marks: " + ROUND(totalMarks[tempSubjectIndex])
+    display "_______________________________________________________________________"
+    display "Student ID\t\t\tMarks\t\t\t\tGrade"
+    FOR i = 0 TO classList.size() - 1
+        display classList.get(i) + "\t\t\t\t" + ROUND(studentMarks[i]) + "\t\t\t\t" + grades[i]
+    END FOR
+    display "_______________________________________________________________________\n"
+    display "Class average: " + ROUND(classAverage) + "\tStandard deviation: " + ROUND(standardDeviation)
+    display "Minimum: " + ROUND(minimum) + "\t\tMaximum: " + ROUND(maximum) + "\t\tRange: " + ROUND(range)
+    display "\nGrade: \tA* \tA \tB \tC \tD \tE \tU"
+    display "Count: \t" + gradeCountAstar + "\t" + gradeCountA + "\t" + gradeCountB + "\t" + gradeCountC + "\t" + gradeCountD + "\t" + gradeCountE + "\t" + gradeCountU
+    display "_______________________________________________________________________\n"
+END PROCEDURE
+END Class
